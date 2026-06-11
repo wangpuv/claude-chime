@@ -10,6 +10,8 @@
 #   CLAUDE_CHIME_SOUND_STOP  macOS sound name for "done"    (default: Glass)
 #   CLAUDE_CHIME_SOUND_WAIT  macOS sound name for "waiting"  (default: Submarine)
 #   CLAUDE_CHIME_NO_USAGE    set to 1 to skip the usage gauge entirely
+#   CLAUDE_CHIME_ACTIVATE    bundle id to focus when the notification is clicked
+#                            (default: auto-detect the launching terminal app)
 set -uo pipefail
 
 MODE="${1:-stop}"
@@ -28,6 +30,25 @@ if [ "$LANG_PREF" = "auto" ]; then
   case "${LC_ALL:-}${LANG:-}" in
     *[Zz][Hh]*) LANG_PREF="zh" ;;
     *) LANG_PREF="en" ;;
+  esac
+fi
+
+# --- click action: focus the terminal that launched Claude Code --------------
+# macOS always shows a default action button ("Show"); bind it to bringing the
+# launching terminal to the front instead of activating terminal-notifier (which
+# has no window, so the click looks like a no-op). __CFBundleIdentifier is set by
+# macOS to the bundle id of the app that launched this process tree.
+# Best-effort only: this activates the terminal *app*, not a specific window/tab
+# — landing on the exact session window needs window-level scripting the terminal
+# may not expose (Apple Terminal, Kaku, … don't), so with multiple windows open
+# the click may surface the wrong one.
+ACTIVATE="${CLAUDE_CHIME_ACTIVATE:-${__CFBundleIdentifier:-}}"
+if [ -z "$ACTIVATE" ]; then
+  case "${TERM_PROGRAM:-}" in
+    iTerm.app)      ACTIVATE="com.googlecode.iterm2" ;;
+    Apple_Terminal) ACTIVATE="com.apple.Terminal" ;;
+    vscode)         ACTIVATE="com.microsoft.VSCode" ;;
+    WezTerm)        ACTIVATE="com.github.wez.wezterm" ;;
   esac
 fi
 
@@ -58,9 +79,13 @@ case "$MODE" in
 esac
 
 # --- fire --------------------------------------------------------------------
+ARGS=(-title "$TITLE" -sound "$SOUND")
 if [ -n "$USAGE" ]; then
-  "$TN" -title "$TITLE" -subtitle "$DEFAULT" -message "$USAGE" -sound "$SOUND" >/dev/null 2>&1 || true
+  ARGS+=(-subtitle "$DEFAULT" -message "$USAGE")
 else
-  "$TN" -title "$TITLE" -message "$DEFAULT" -sound "$SOUND" >/dev/null 2>&1 || true
+  ARGS+=(-message "$DEFAULT")
 fi
+[ -n "$ACTIVATE" ] && ARGS+=(-activate "$ACTIVATE")
+
+"$TN" "${ARGS[@]}" >/dev/null 2>&1 || true
 exit 0

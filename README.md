@@ -56,9 +56,22 @@ edit the hook commands in `~/.claude/settings.json`, or export them globally.
 | `CLAUDE_CHIME_SOUND_STOP` | `Glass` | Sound for "task done" |
 | `CLAUDE_CHIME_SOUND_WAIT` | `Submarine` | Sound for "needs you" |
 | `CLAUDE_CHIME_NO_USAGE` | `0` | Set `1` to hide the usage gauge |
+| `CLAUDE_CHIME_ACTIVATE` | _(auto)_ | Bundle id to focus when the notification is clicked; defaults to the terminal that launched Claude Code |
 
 Sound names are the files in `/System/Library/Sounds` (Glass, Submarine, Ping,
 Hero, Funk, …).
+
+### Clicking the notification
+
+macOS always shows a default action button on the banner ("Show"). Claude Chime
+binds it to bringing the terminal that launched Claude Code to the front (instead
+of the no-op default). This is **best-effort**: it activates the terminal _app_,
+but landing on the exact window/tab that's running your session requires the
+terminal to expose window-level scripting (e.g. iTerm2 can select a session by
+tty). Terminals without that — Apple Terminal, Kaku, and most others — just come
+to the front showing their last-active window, so with several windows open the
+click may not land on the right one. Override the target app with
+`CLAUDE_CHIME_ACTIVATE` (a bundle id).
 
 ## Uninstall
 
