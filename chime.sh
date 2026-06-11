@@ -17,6 +17,14 @@ set -uo pipefail
 MODE="${1:-stop}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# --- version -----------------------------------------------------------------
+case "$MODE" in
+  --version|-v|version)
+    echo "claude-chime $(cat "$HERE/VERSION" 2>/dev/null || echo unknown)"
+    exit 0
+    ;;
+esac
+
 # --- locate terminal-notifier ------------------------------------------------
 TN="${CLAUDE_CHIME_TN:-}"
 [ -z "$TN" ] && TN="$(command -v terminal-notifier 2>/dev/null || true)"

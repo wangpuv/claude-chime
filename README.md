@@ -28,6 +28,19 @@ That's it. New Claude Code sessions will chime. The installer:
 
 > **Requirements:** macOS + [Homebrew](https://brew.sh). Existing hooks are preserved; the installer is idempotent and safe to re-run.
 
+## Updating
+
+Re-run the same one-liner — that **is** the upgrade. It re-pulls the latest
+runtime into `~/.claude-chime`, and because the installer is idempotent it won't
+duplicate your hooks:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wangpuv/claude-chime/main/install.sh | bash
+```
+
+Check what you're running with `~/.claude-chime/chime.sh --version`, and see
+[CHANGELOG.md](CHANGELOG.md) for what changed.
+
 ## How the usage gauge works
 
 The gauge shows your remaining limits, mirroring Claude Code's own `/usage`:

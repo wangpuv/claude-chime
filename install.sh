@@ -33,6 +33,7 @@ mkdir -p "$DEST"
 say "Downloading runtime files into $DEST"
 curl -fsSL "$REPO_RAW/chime.sh"             -o "$DEST/chime.sh"
 curl -fsSL "$REPO_RAW/usage.py"             -o "$DEST/usage.py"
+curl -fsSL "$REPO_RAW/VERSION"              -o "$DEST/VERSION"
 curl -fsSL "$REPO_RAW/assets/claude-logo.png" -o "$DEST/claude-logo.png"
 chmod +x "$DEST/chime.sh"
 
@@ -112,7 +113,7 @@ PY
 say "Sending a test chime"
 CLAUDE_CHIME_TN="$TN" "$DEST/chime.sh" stop || true
 
-ok "Claude Chime is installed."
+ok "Claude Chime $(cat "$DEST/VERSION" 2>/dev/null || echo '') is installed."
 echo
 echo "  • New chimes take effect in new Claude Code sessions."
 echo "  • Customize via env vars in ~/.claude/settings.json (see README):"
