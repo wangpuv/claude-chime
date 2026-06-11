@@ -29,10 +29,16 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
 - **Usage gauge data**: undocumented endpoint
   `https://api.anthropic.com/api/oauth/usage`, authed with the OAuth token from
   the macOS Keychain item `Claude Code-credentials` (key
-  `claudeAiOauth.accessToken`). Returns `five_hour.utilization` and
-  `seven_day.utilization`; remaining = `100 - utilization`. If it 401s or the
+  `claudeAiOauth.accessToken`). Returns `{utilization, resets_at}` for both
+  `five_hour` and `seven_day`; remaining = `100 - utilization`, and the gauge
+  shows a `⏳` countdown to `resets_at` (session h+m, week d+h). If it 401s or the
   schema changes, `usage.py` prints nothing and the chime degrades to plain text.
   Same data `/usage` shows; it's the user's own token, read-only.
+- **Usage cache (429 guard)**: the endpoint rate-limits, and a `Notification`
+  then `Stop` can fire seconds apart, so the second fetch often 429s. `usage.py`
+  caches the last good response at `$TMPDIR/claude-chime-usage.json` and, on any
+  fetch failure within `CACHE_TTL` (300s), reuses it. The `⏳` countdown is
+  recomputed live from the cached `resets_at`, so only the % can be slightly stale.
 - **Hooks**: wired on Claude Code's `Stop` (done, Glass sound) and `Notification`
   (waiting, Submarine sound) events. They coexist with the user's existing
   `claude-island-state.py` hooks — never clobber those.

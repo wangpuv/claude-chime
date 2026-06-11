@@ -8,14 +8,23 @@ so the caller can always fall back to a plain message.
 Usage: usage.py [zh|en]
 """
 import json
+import os
 import subprocess
 import sys
+import tempfile
+import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 
 LANG = sys.argv[1] if len(sys.argv) > 1 else "en"
 ENDPOINT = "https://api.anthropic.com/api/oauth/usage"
 TIMEOUT = 4
+# Back-to-back Stop+Notification fires can get rate-limited (429). Reuse the last
+# good response within this window so the second chime still shows the gauge; the
+# reset countdown is recomputed live from resets_at, so only the % may be stale.
+CACHE_PATH = os.path.join(tempfile.gettempdir(), "claude-chime-usage.json")
+CACHE_TTL = 300
 
 
 def get_token():
@@ -44,8 +53,54 @@ def fetch(token):
         return json.load(resp)
 
 
+def cache_save(data):
+    try:
+        with open(CACHE_PATH, "w") as f:
+            json.dump(data, f)
+    except OSError:
+        pass
+
+
+def cache_load():
+    """Return the last good response if cached within CACHE_TTL, else None."""
+    try:
+        if time.time() - os.path.getmtime(CACHE_PATH) > CACHE_TTL:
+            return None
+        with open(CACHE_PATH) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
 def clamp(n):
     return max(0, min(100, n))
+
+
+def seconds_until(iso):
+    """Seconds from now until an ISO-8601 reset timestamp, or None on failure."""
+    try:
+        reset = datetime.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return None
+    if reset.tzinfo is None:
+        reset = reset.replace(tzinfo=timezone.utc)
+    return max(0, (reset - datetime.now(timezone.utc)).total_seconds())
+
+
+def fmt_hm(secs):
+    """Countdown to hours+minutes, e.g. '3h25m' / '3时25分'."""
+    m = int(secs // 60)
+    h, m = divmod(m, 60)
+    return f"{h}时{m}分" if LANG == "zh" else f"{h}h{m}m"
+
+
+def fmt_dh(secs):
+    """Countdown to days+hours; days dropped when zero, e.g. '5d3h' / '19时'."""
+    h = int(secs // 3600)
+    d, h = divmod(h, 24)
+    if d == 0:
+        return f"{h}时" if LANG == "zh" else f"{h}h"
+    return f"{d}天{h}时" if LANG == "zh" else f"{d}d{h}h"
 
 
 def main():
@@ -54,17 +109,26 @@ def main():
         return
     try:
         data = fetch(token)
+        cache_save(data)
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError):
-        return
+        data = cache_load()  # rate-limited / offline: fall back to last good
+        if data is None:
+            return
     try:
         session = clamp(round(100 - float(data["five_hour"]["utilization"])))
         week = clamp(round(100 - float(data["seven_day"]["utilization"])))
     except (KeyError, TypeError, ValueError):
         return
+    s_reset = seconds_until(data.get("five_hour", {}).get("resets_at"))
+    w_reset = seconds_until(data.get("seven_day", {}).get("resets_at"))
+    # ⏳ marks "time until reset", so it reads apart from the balance %.
     if LANG == "zh":
-        print(f"本次会话余量 {session}% · 本周余量 {week}%")
+        s = f"会话 {session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
+        w = f"本周 {week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
     else:
-        print(f"Session {session}% left · Week {week}% left")
+        s = f"Session {session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
+        w = f"Week {week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
+    print(f"{s} · {w}")
 
 
 if __name__ == "__main__":

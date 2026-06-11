@@ -79,6 +79,10 @@ case "$MODE" in
 esac
 
 # --- fire --------------------------------------------------------------------
+# Keep the content the star of the show: it goes in the bold subtitle (top,
+# prominent), with the compact usage gauge trailing in the lighter message body.
+# A banner only renders one line per field reliably, so they must be separate
+# fields — a two-line message gets its second line clipped.
 ARGS=(-title "$TITLE" -sound "$SOUND")
 if [ -n "$USAGE" ]; then
   ARGS+=(-subtitle "$DEFAULT" -message "$USAGE")
