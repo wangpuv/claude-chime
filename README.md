@@ -9,7 +9,7 @@ When Claude finishes a task or needs your input, you get a native notification w
 - 🌐 **English + 中文**, auto-detected from your system language
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Claude Chime notification — task done and waiting-for-you states, English and 中文" width="540">
+  <img src="assets/demo.png" alt="Claude Chime notification — Claude icon, message, and a live session/weekly usage gauge" width="540">
 </p>
 
 ## Install
