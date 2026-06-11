@@ -59,3 +59,11 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
 - Update the README demo: take a real notification screenshot, save as `assets/demo.png`.
 - Test a chime locally: `CLAUDE_CHIME_LANG=zh bash chime.sh stop`
 - Push: `git push origin main` (gh credential helper is configured).
+- **Cut a release** (versioning is `VERSION` + tags + `CHANGELOG.md`; `VERSION`
+  is the single source of truth, read by `chime.sh --version`, and the installer
+  downloads it into the runtime). Steps:
+  1. Bump `VERSION` (semver) and add a dated section to `CHANGELOG.md`.
+  2. Commit, then `git tag -a vX.Y.Z -m '…'` and `git push origin main --tags`.
+  3. `gh release create vX.Y.Z --title … --notes …` (notes from the changelog).
+  - Users upgrade by **re-running the install one-liner** — it's idempotent and
+    re-pulls the latest runtime; there is no auto-update check (yet).
