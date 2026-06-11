@@ -17,7 +17,7 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
 | `chime.sh` | Notification logic. `chime.sh <stop|waiting>`; bilingual; sounds/lang via env. |
 | `usage.py` | Reads OAuth token from Keychain, queries the usage endpoint, prints the gauge line. Fail-silent. |
 | `assets/claude-logo.png` | Official Claude logo (source: VS Code ext `anthropic.claude-code-*/resources/claude-logo.png`). |
-| `tools/make-demo.py` | Old HTML→Chrome→Pillow mockup generator. **No longer used** — `assets/demo.png` is now a real notification screenshot (the mockup styled the gauge orange, which the real macOS notification never shows). Don't run it against `demo.png`; it would overwrite the real screenshot. |
+| `assets/demo.png` | Real notification screenshot shown in the README. |
 
 ## Non-obvious implementation facts (don't relearn the hard way)
 
@@ -44,12 +44,12 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
 - Shell scripts: `set -euo pipefail` (chime.sh uses `-uo` only, must never fail a
   hook), fail-silent on anything user-facing, prefer absolute tool paths.
 - Keep it dependency-light: macOS built-ins + Homebrew terminal-notifier + system
-  `python3`. No pip deps at runtime (Pillow is only for `tools/make-demo.py`).
+  `python3`. No pip deps.
 - After changing scripts, remember the **running copy** is `~/.claude-chime`;
   reinstall (`curl … | bash` or copy files over) to dogfood changes.
 
 ## Common tasks
 
-- Update the README demo: take a real notification screenshot, save as `assets/demo.png` (the old `tools/make-demo.py` mockup is retired).
+- Update the README demo: take a real notification screenshot, save as `assets/demo.png`.
 - Test a chime locally: `CLAUDE_CHIME_LANG=zh bash chime.sh stop`
 - Push: `git push origin main` (gh credential helper is configured).
