@@ -8,13 +8,9 @@ When Claude finishes a task or needs your input, you get a native notification w
 - 📊 **a live usage gauge** — how much of your **session** and **weekly** limits is left
 - 🌐 **English + 中文**, auto-detected from your system language
 
-```
-┌─────────────────────────────────────────┐
-│ 🟠  Claude Code · Done                    │
-│     Task finished — back to you           │
-│     Session 67% left · Week 62% left      │
-└─────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="assets/demo.gif" alt="Claude Chime notification — task done and waiting-for-you states, English and 中文" width="540">
+</p>
 
 ## Install
 
