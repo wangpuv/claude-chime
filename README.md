@@ -5,7 +5,8 @@ When Claude finishes a task or needs your input, you get a native notification w
 
 - 🟠 **the real Claude icon** (not the generic script/terminal icon)
 - 🔊 **a pleasant sound** (different for "done" vs. "waiting")
-- 📊 **a live usage gauge** — how much of your **session** and **weekly** limits is left
+- 📊 **a live usage gauge** — how much of your **session** and **weekly** limits is
+  left, plus a ⏳ **countdown to when each limit resets**
 - 🌐 **English + 中文**, auto-detected from your system language
 
 <p align="center">
@@ -31,8 +32,13 @@ That's it. New Claude Code sessions will chime. The installer:
 
 The gauge shows your remaining limits, mirroring Claude Code's own `/usage`:
 
-- **Session** = `100 − five_hour.utilization`
-- **Week** = `100 − seven_day.utilization`
+- **Session** = `100 − five_hour.utilization`, with a ⏳ countdown to its reset
+  (hours + minutes)
+- **Week** = `100 − seven_day.utilization`, with a ⏳ countdown to its reset
+  (days + hours)
+
+So a chime reads like `会话 30% ⏳2时28分 · 本周 58% ⏳19时` /
+`Session 30% ⏳2h28m · Week 58% ⏳19h`, trailing under the main message.
 
 It reads your Claude Code OAuth token from the **macOS login Keychain**
 (`Claude Code-credentials`) and queries the same endpoint `/usage` uses
@@ -43,6 +49,10 @@ It reads your Claude Code OAuth token from the **macOS login Keychain**
 - This is **read-only** and uses **your own** token and account.
 - The endpoint is **undocumented**; if Anthropic changes it, the gauge simply
   disappears and you still get the plain "done / waiting" chime. Nothing breaks.
+- The endpoint rate-limits, and a "needs you" then "done" chime can fire seconds
+  apart. To avoid a blank gauge on the second one, the last good response is
+  cached for ~5 min in your temp dir and reused if a fetch is rate-limited — the
+  ⏳ countdown is still recomputed live, so only the % may be a little stale.
 - Don't want it? Set `CLAUDE_CHIME_NO_USAGE=1` (see below).
 
 ## Customize
@@ -96,8 +106,7 @@ Claude Code  ──(Stop / Notification hook)──▶  chime.sh ──▶ usage
 ## Contributing
 
 Issues and PRs welcome — this is meant to be improved together. Good first ideas:
-Linux/`notify-send` support, more languages, a `/usage`-style reset countdown,
-configurable messages.
+Linux/`notify-send` support, more languages, configurable messages.
 
 ## License
 
