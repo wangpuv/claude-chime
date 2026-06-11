@@ -17,7 +17,7 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
 | `chime.sh` | Notification logic. `chime.sh <stop|waiting>`; bilingual; sounds/lang via env. |
 | `usage.py` | Reads OAuth token from Keychain, queries the usage endpoint, prints the gauge line. Fail-silent. |
 | `assets/claude-logo.png` | Official Claude logo (source: VS Code ext `anthropic.claude-code-*/resources/claude-logo.png`). |
-| `tools/make-demo.py` | Regenerates `assets/demo.gif` + `demo.png` (HTML → headless Chrome → Pillow GIF). |
+| `tools/make-demo.py` | Old HTML→Chrome→Pillow mockup generator. **No longer used** — `assets/demo.png` is now a real notification screenshot (the mockup styled the gauge orange, which the real macOS notification never shows). Don't run it against `demo.png`; it would overwrite the real screenshot. |
 
 ## Non-obvious implementation facts (don't relearn the hard way)
 
@@ -50,6 +50,6 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
 
 ## Common tasks
 
-- Regenerate the README demo: `python3 tools/make-demo.py`
+- Update the README demo: take a real notification screenshot, save as `assets/demo.png` (the old `tools/make-demo.py` mockup is retired).
 - Test a chime locally: `CLAUDE_CHIME_LANG=zh bash chime.sh stop`
 - Push: `git push origin main` (gh credential helper is configured).
