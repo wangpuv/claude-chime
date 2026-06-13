@@ -7,6 +7,14 @@ All notable changes to Claude Chime are recorded here. The format follows
 To upgrade, re-run the install one-liner (it is idempotent and pulls the latest
 runtime). See the README's **Updating** section.
 
+## [1.2.1] — 2026-06-13
+
+### Fixed
+- Gauge bars now line up. Text labels (`Session` / `Week`) differ in width in
+  the notification's proportional font, which pushed the bars out of alignment;
+  they're replaced with fixed-width emoji labels — ⏱️ session, 📅 week — that
+  align in both languages.
+
 ## [1.2.0] — 2026-06-13
 
 ### Added
@@ -49,5 +57,6 @@ runtime). See the README's **Updating** section.
 - Click the notification to focus the terminal that launched Claude Code.
 - One-line `curl | bash` installer/uninstaller; idempotent and hook-safe.
 
+[1.2.1]: https://github.com/wangpuv/claude-chime/releases/tag/v1.2.1
 [1.2.0]: https://github.com/wangpuv/claude-chime/releases/tag/v1.2.0
 [1.1.0]: https://github.com/wangpuv/claude-chime/releases/tag/v1.1.0

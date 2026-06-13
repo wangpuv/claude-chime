@@ -79,6 +79,9 @@ def clamp(n):
 # Color the balance at a glance: green plenty, yellow low, red almost out.
 LOW, CRITICAL = 30, 10
 BAR_SEGMENTS = 5
+# Fixed-width emoji labels so the bars line up in a proportional font (text
+# labels like "Session"/"Week" differ in width and break the alignment).
+SESSION_ICON, WEEK_ICON = "⏱️", "📅"
 
 
 def dot(pct):
@@ -149,9 +152,8 @@ def main():
     # Session and week go on their own lines so neither wraps. ⏳ marks "time
     # until reset"; a leading "~" marks a cached (slightly stale) percentage.
     mark = "~" if stale else ""
-    s_label, w_label = ("会话", "本周") if LANG == "zh" else ("Session", "Week")
-    s = f"{dot(session)} {s_label} {bar(session)} {mark}{session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
-    w = f"{dot(week)} {w_label} {bar(week)} {mark}{week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
+    s = f"{dot(session)} {SESSION_ICON} {bar(session)} {mark}{session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
+    w = f"{dot(week)} {WEEK_ICON} {bar(week)} {mark}{week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
     print(s)
     print(w)
 

@@ -55,11 +55,12 @@ The gauge shows your remaining limits, mirroring Claude Code's own `/usage`:
   (days + hours)
 
 Each line gets a 🟢🟡🔴 dot (plenty / low / almost out) and a little `▰▰▰▰▱`
-bar, so a chime reads like:
+bar. The labels are fixed-width emoji — ⏱️ session, 📅 week — so the bars line
+up in the notification's proportional font. A chime reads like:
 
 ```
-🟢 Session ▰▰▰▰▱ 78% ⏳3h59m
-🟢 Week    ▰▰▰▰▰ 98% ⏳5d16h
+🟢 ⏱️ ▰▰▰▰▱ 78% ⏳3h59m
+🟢 📅 ▰▰▰▰▰ 98% ⏳5d16h
 ```
 
 (`<1m` / `<1h` once a reset is imminent, and a leading `~` if the number is
