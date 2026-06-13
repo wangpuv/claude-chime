@@ -34,11 +34,17 @@ session/weekly usage gauge, in English and 中文. Open source, Apache-2.0.
   shows a `⏳` countdown to `resets_at` (session h+m, week d+h). If it 401s or the
   schema changes, `usage.py` prints nothing and the chime degrades to plain text.
   Same data `/usage` shows; it's the user's own token, read-only.
-- **Usage cache (429 guard)**: the endpoint rate-limits, and a `Notification`
-  then `Stop` can fire seconds apart, so the second fetch often 429s. `usage.py`
-  caches the last good response at `$TMPDIR/claude-chime-usage.json` and, on any
-  fetch failure within `CACHE_TTL` (300s), reuses it. The `⏳` countdown is
-  recomputed live from the cached `resets_at`, so only the % can be slightly stale.
+- **Usage cache (429 guard)**: the endpoint rate-limits *hard* (a burst of
+  requests trips a multi-minute cooldown), and chimes are event-driven (every
+  `Stop`/`Notification`), so `usage.py` polls it like a background gauge would.
+  Two-tier cache at `$TMPDIR/claude-chime-usage.json`: if it's younger than
+  `FRESH_TTL` (60s) it's reused **without any fetch** (so a burst of chimes is
+  one request, not N); only an older cache triggers a fetch, and a failed fetch
+  falls back to a cache up to `STALE_TTL` (300s) old, marked with a leading `~`.
+  The `⏳` countdown is recomputed live from `resets_at`, so only the % is stale.
+  Note: a 429 here is usually self-inflicted (heavy testing) — it clears on its
+  own after a few idle minutes; the token/code are fine. (CodexBar is OpenAI's,
+  a separate service/token — not a competitor for this Claude endpoint.)
 - **Hooks**: wired on Claude Code's `Stop` (done, Glass sound) and `Notification`
   (waiting, Submarine sound) events. They coexist with the user's existing
   `claude-island-state.py` hooks — never clobber those.

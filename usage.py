@@ -24,7 +24,14 @@ TIMEOUT = 4
 # good response within this window so the second chime still shows the gauge; the
 # reset countdown is recomputed live from resets_at, so only the % may be stale.
 CACHE_PATH = os.path.join(tempfile.gettempdir(), "claude-chime-usage.json")
-CACHE_TTL = 300
+# The endpoint rate-limits hard, and chimes are event-driven (every Stop /
+# Notification), so a busy session would 429 constantly. We poll it like a
+# background gauge would: if the cache is younger than FRESH_TTL, use it WITHOUT
+# fetching at all — so many chimes in a row cost at most one request a minute.
+# Only when the cache is older do we fetch; if that fetch fails we still fall
+# back to a cached value up to STALE_TTL old (marked "~", % may be a bit stale).
+FRESH_TTL = 60
+STALE_TTL = 300
 
 
 def get_token():
@@ -61,10 +68,10 @@ def cache_save(data):
         pass
 
 
-def cache_load():
-    """Return the last good response if cached within CACHE_TTL, else None."""
+def cache_load(max_age):
+    """Return the cached response if it's younger than max_age seconds, else None."""
     try:
-        if time.time() - os.path.getmtime(CACHE_PATH) > CACHE_TTL:
+        if time.time() - os.path.getmtime(CACHE_PATH) > max_age:
             return None
         with open(CACHE_PATH) as f:
             return json.load(f)
@@ -134,14 +141,16 @@ def main():
     if not token:
         return
     stale = False
-    try:
-        data = fetch(token)
-        cache_save(data)
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError):
-        data = cache_load()  # rate-limited / offline: fall back to last good
-        if data is None:
-            return
-        stale = True  # served from cache: the % may be a few minutes old
+    data = cache_load(FRESH_TTL)  # fresh enough? don't even hit the endpoint
+    if data is None:
+        try:
+            data = fetch(token)
+            cache_save(data)
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError):
+            data = cache_load(STALE_TTL)  # rate-limited / offline: last good
+            if data is None:
+                return
+            stale = True  # served from older cache: the % may be a few min old
     try:
         session = clamp(round(100 - float(data["five_hour"]["utilization"])))
         week = clamp(round(100 - float(data["seven_day"]["utilization"])))

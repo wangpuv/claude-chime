@@ -75,10 +75,12 @@ It reads your Claude Code OAuth token from the **macOS login Keychain**
 - This is **read-only** and uses **your own** token and account.
 - The endpoint is **undocumented**; if Anthropic changes it, the gauge simply
   disappears and you still get the plain "done / waiting" chime. Nothing breaks.
-- The endpoint rate-limits, and a "needs you" then "done" chime can fire seconds
-  apart. To avoid a blank gauge on the second one, the last good response is
-  cached for ~5 min in your temp dir and reused if a fetch is rate-limited — the
-  ⏳ countdown is still recomputed live, so only the % may be a little stale.
+- The endpoint **rate-limits hard**, and chimes are event-driven, so we poll it
+  gently: a response cached in your temp dir less than a minute old is reused
+  **without re-fetching**, so a burst of chimes costs at most one request a
+  minute. Only an older cache triggers a fetch; if that's rate-limited, the last
+  good value (up to ~5 min old) is shown with a leading `~`. The ⏳ countdown is
+  always recomputed live, so only the % can be slightly stale.
 - Don't want it? Set `CLAUDE_CHIME_NO_USAGE=1` (see below).
 
 ## Customize

@@ -7,6 +7,15 @@ All notable changes to Claude Chime are recorded here. The format follows
 To upgrade, re-run the install one-liner (it is idempotent and pulls the latest
 runtime). See the README's **Updating** section.
 
+## [1.2.2] — 2026-06-13
+
+### Changed
+- Poll the usage endpoint gently to avoid self-inflicted rate-limit (429)
+  blanks. A cached response younger than `FRESH_TTL` (60s) is now reused
+  **without re-fetching**, so a burst of chimes costs at most one request a
+  minute. Only an older cache triggers a fetch; a rate-limited fetch still
+  falls back to a value up to `STALE_TTL` (300s) old, marked `~`.
+
 ## [1.2.1] — 2026-06-13
 
 ### Fixed
@@ -57,6 +66,7 @@ runtime). See the README's **Updating** section.
 - Click the notification to focus the terminal that launched Claude Code.
 - One-line `curl | bash` installer/uninstaller; idempotent and hook-safe.
 
+[1.2.2]: https://github.com/wangpuv/claude-chime/releases/tag/v1.2.2
 [1.2.1]: https://github.com/wangpuv/claude-chime/releases/tag/v1.2.1
 [1.2.0]: https://github.com/wangpuv/claude-chime/releases/tag/v1.2.0
 [1.1.0]: https://github.com/wangpuv/claude-chime/releases/tag/v1.1.0
