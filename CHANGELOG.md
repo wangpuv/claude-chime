@@ -7,6 +7,22 @@ All notable changes to Claude Chime are recorded here. The format follows
 To upgrade, re-run the install one-liner (it is idempotent and pulls the latest
 runtime). See the README's **Updating** section.
 
+## [1.2.0] — 2026-06-13
+
+### Added
+- **Action icon** on the message: ✅ for "done", 👀 for "needs you", so the two
+  chime types are distinguishable at a glance.
+- **Color-coded balance**: each gauge line leads with a 🟢🟡🔴 dot
+  (>30% / 10–30% / <10% remaining) and a small `▰▰▰▰▱` bar.
+- Imminent resets read `<1分` / `<1m` (session) and `<1时` / `<1h` (week)
+  instead of a row of zeros.
+- A leading `~` marks a percentage served from cache (a rate-limited fetch).
+
+### Changed
+- The gauge now shows **session and week on their own lines** so neither wraps.
+- Chimes share a notification **group**, so a new one replaces the previous in
+  Notification Center instead of stacking up.
+
 ## [1.1.0] — 2026-06-11
 
 ### Added
@@ -33,4 +49,5 @@ runtime). See the README's **Updating** section.
 - Click the notification to focus the terminal that launched Claude Code.
 - One-line `curl | bash` installer/uninstaller; idempotent and hook-safe.
 
+[1.2.0]: https://github.com/wangpuv/claude-chime/releases/tag/v1.2.0
 [1.1.0]: https://github.com/wangpuv/claude-chime/releases/tag/v1.1.0

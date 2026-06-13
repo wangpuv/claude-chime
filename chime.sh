@@ -69,18 +69,20 @@ fi
 # --- compose message ---------------------------------------------------------
 case "$MODE" in
   waiting)
+    # 👀 leads the content so you can tell "needs you" from ✅ "done" at a glance.
     if [ "$LANG_PREF" = "zh" ]; then
-      TITLE="Claude Code · 等你确认"; DEFAULT="有操作在等你确认 / 输入"
+      TITLE="Claude Code · 等你确认"; DEFAULT="👀 有操作在等你确认 / 输入"
     else
-      TITLE="Claude Code · Needs you"; DEFAULT="Waiting for your confirmation / input"
+      TITLE="Claude Code · Needs you"; DEFAULT="👀 Waiting for your confirmation / input"
     fi
     SOUND="${CLAUDE_CHIME_SOUND_WAIT:-Submarine}"
     ;;
   *)
+    # ✅ (green check) leads the content so "done" reads at a glance.
     if [ "$LANG_PREF" = "zh" ]; then
-      TITLE="Claude Code · 任务完成"; DEFAULT="任务已完成，等你查看"
+      TITLE="Claude Code · 任务完成"; DEFAULT="✅ 任务已完成，等你查看"
     else
-      TITLE="Claude Code · Done"; DEFAULT="Task finished — back to you"
+      TITLE="Claude Code · Done"; DEFAULT="✅ Task finished — back to you"
     fi
     SOUND="${CLAUDE_CHIME_SOUND_STOP:-Glass}"
     ;;
@@ -88,10 +90,10 @@ esac
 
 # --- fire --------------------------------------------------------------------
 # Keep the content the star of the show: it goes in the bold subtitle (top,
-# prominent), with the compact usage gauge trailing in the lighter message body.
-# A banner only renders one line per field reliably, so they must be separate
-# fields — a two-line message gets its second line clipped.
-ARGS=(-title "$TITLE" -sound "$SOUND")
+# prominent), with the usage gauge (session + week, one per line) in the lighter
+# message body. A shared -group means each new chime replaces the previous one
+# in Notification Center instead of stacking up — only the latest state matters.
+ARGS=(-title "$TITLE" -sound "$SOUND" -group "claude-chime")
 if [ -n "$USAGE" ]; then
   ARGS+=(-subtitle "$DEFAULT" -message "$USAGE")
 else

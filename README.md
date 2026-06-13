@@ -5,12 +5,16 @@ When Claude finishes a task or needs your input, you get a native notification w
 
 - 🟠 **the real Claude icon** (not the generic script/terminal icon)
 - 🔊 **a pleasant sound** (different for "done" vs. "waiting")
-- 📊 **a live usage gauge** — how much of your **session** and **weekly** limits is
-  left, plus a ⏳ **countdown to when each limit resets**
+- ✅ / 👀 **an action icon** so you can tell "done" from "needs you" at a glance
+- 📊 **a live usage gauge** — your **session** and **weekly** balance as a
+  color-coded 🟢🟡🔴 bar, plus a ⏳ **countdown to when each limit resets**
 - 🌐 **English + 中文**, auto-detected from your system language
 
+Repeat chimes **replace** the previous one in Notification Center instead of
+stacking up, so you only ever see the latest state.
+
 <p align="center">
-  <img src="assets/demo.png" alt="Claude Chime notification — Claude icon, message, and a live session/weekly usage gauge with reset countdowns" width="540">
+  <img src="assets/demo.png" alt="Claude Chime notification — Claude icon, a done/needs-you action icon, and a color-coded session/weekly usage gauge with bars and reset countdowns" width="540">
 </p>
 
 ## Install
@@ -50,8 +54,16 @@ The gauge shows your remaining limits, mirroring Claude Code's own `/usage`:
 - **Week** = `100 − seven_day.utilization`, with a ⏳ countdown to its reset
   (days + hours)
 
-So a chime reads like `会话 30% ⏳2时28分 · 本周 58% ⏳19时` /
-`Session 30% ⏳2h28m · Week 58% ⏳19h`, trailing under the main message.
+Each line gets a 🟢🟡🔴 dot (plenty / low / almost out) and a little `▰▰▰▰▱`
+bar, so a chime reads like:
+
+```
+🟢 Session ▰▰▰▰▱ 78% ⏳3h59m
+🟢 Week    ▰▰▰▰▰ 98% ⏳5d16h
+```
+
+(`<1m` / `<1h` once a reset is imminent, and a leading `~` if the number is
+served from cache — see below.)
 
 It reads your Claude Code OAuth token from the **macOS login Keychain**
 (`Claude Code-credentials`) and queries the same endpoint `/usage` uses

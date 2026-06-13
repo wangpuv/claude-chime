@@ -76,6 +76,25 @@ def clamp(n):
     return max(0, min(100, n))
 
 
+# Color the balance at a glance: green plenty, yellow low, red almost out.
+LOW, CRITICAL = 30, 10
+BAR_SEGMENTS = 5
+
+
+def dot(pct):
+    if pct < CRITICAL:
+        return "🔴"
+    if pct < LOW:
+        return "🟡"
+    return "🟢"
+
+
+def bar(pct):
+    """A tiny filled/empty bar, e.g. 78% -> '▰▰▰▰▱'."""
+    filled = max(0, min(BAR_SEGMENTS, round(pct / 100 * BAR_SEGMENTS)))
+    return "▰" * filled + "▱" * (BAR_SEGMENTS - filled)
+
+
 def seconds_until(iso):
     """Seconds from now until an ISO-8601 reset timestamp, or None on failure."""
     try:
@@ -88,16 +107,20 @@ def seconds_until(iso):
 
 
 def fmt_hm(secs):
-    """Countdown to hours+minutes, e.g. '3h25m' / '3时25分'."""
+    """Countdown to hours+minutes, e.g. '3h25m' / '3时25分'; '<1分' under a minute."""
     m = int(secs // 60)
     h, m = divmod(m, 60)
+    if h == 0 and m == 0:
+        return "<1分" if LANG == "zh" else "<1m"
     return f"{h}时{m}分" if LANG == "zh" else f"{h}h{m}m"
 
 
 def fmt_dh(secs):
-    """Countdown to days+hours; days dropped when zero, e.g. '5d3h' / '19时'."""
+    """Countdown to days+hours; days dropped when zero, '<1时' under an hour."""
     h = int(secs // 3600)
     d, h = divmod(h, 24)
+    if d == 0 and h == 0:
+        return "<1时" if LANG == "zh" else "<1h"
     if d == 0:
         return f"{h}时" if LANG == "zh" else f"{h}h"
     return f"{d}天{h}时" if LANG == "zh" else f"{d}d{h}h"
@@ -107,6 +130,7 @@ def main():
     token = get_token()
     if not token:
         return
+    stale = False
     try:
         data = fetch(token)
         cache_save(data)
@@ -114,6 +138,7 @@ def main():
         data = cache_load()  # rate-limited / offline: fall back to last good
         if data is None:
             return
+        stale = True  # served from cache: the % may be a few minutes old
     try:
         session = clamp(round(100 - float(data["five_hour"]["utilization"])))
         week = clamp(round(100 - float(data["seven_day"]["utilization"])))
@@ -121,14 +146,14 @@ def main():
         return
     s_reset = seconds_until(data.get("five_hour", {}).get("resets_at"))
     w_reset = seconds_until(data.get("seven_day", {}).get("resets_at"))
-    # ⏳ marks "time until reset", so it reads apart from the balance %.
-    if LANG == "zh":
-        s = f"会话 {session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
-        w = f"本周 {week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
-    else:
-        s = f"Session {session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
-        w = f"Week {week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
-    print(f"{s} · {w}")
+    # Session and week go on their own lines so neither wraps. ⏳ marks "time
+    # until reset"; a leading "~" marks a cached (slightly stale) percentage.
+    mark = "~" if stale else ""
+    s_label, w_label = ("会话", "本周") if LANG == "zh" else ("Session", "Week")
+    s = f"{dot(session)} {s_label} {bar(session)} {mark}{session}%" + (f" ⏳{fmt_hm(s_reset)}" if s_reset is not None else "")
+    w = f"{dot(week)} {w_label} {bar(week)} {mark}{week}%" + (f" ⏳{fmt_dh(w_reset)}" if w_reset is not None else "")
+    print(s)
+    print(w)
 
 
 if __name__ == "__main__":
