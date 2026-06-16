@@ -1,5 +1,7 @@
 # Claude Chime 🔔
 
+**English** · [中文](README.zh-CN.md)
+
 A friendly desktop chime for [Claude Code](https://claude.com/claude-code) on macOS.
 When Claude finishes a task or needs your input, you get a native notification with:
 
@@ -110,6 +112,24 @@ tty). Terminals without that — Apple Terminal, Kaku, and most others — just 
 to the front showing their last-active window, so with several windows open the
 click may not land on the right one. Override the target app with
 `CLAUDE_CHIME_ACTIVATE` (a bundle id).
+
+### Make the notification stay longer
+
+How long a chime lingers on screen isn't set by Claude Chime — it's the macOS
+**alert style** for the sending app, and macOS offers only two:
+
+- **Temporary** (banner) — slides away after a few seconds (the default)
+- **Persistent** (alert) — stays until you click or dismiss it
+
+To switch, open **System Settings → Notifications → terminal-notifier** and set
+**Alert Style** to **Persistent**:
+
+<p align="center">
+  <img src="assets/alert-style.png" alt="macOS Notifications settings for terminal-notifier, with Alert Style set to Persistent" width="540">
+</p>
+
+This is global to both chime types (done and needs-you), since both are sent by
+`terminal-notifier`. There's no in-between duration — only banner vs. alert.
 
 ## Uninstall
 
